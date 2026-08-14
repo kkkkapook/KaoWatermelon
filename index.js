@@ -22,6 +22,7 @@
       .then((snapshot) => {
         top3Scores = [];
         const rankListEl = document.getElementById("rankList");
+        if (!rankListEl) return;
         rankListEl.innerHTML = "";
 
         if (snapshot.empty) {
@@ -83,6 +84,7 @@
 
   let isGameOver = false;
   let score = 0;
+  let ball = null;
 
   let isLineEnable = false;
 
@@ -120,7 +122,7 @@
     canvas.width = 480;
 
     const scaleX = window.innerWidth / 480;
-    const scaleY = (window.innerHeight - 40) / 720; // 하단 바닥(40px) 고려하여 비율 스케일링
+    const scaleY = window.innerHeight / 780; // 모바일 전체 높이 맞춤 비율
 
     currentScale = Math.min(scaleX, scaleY);
 
@@ -128,14 +130,12 @@
     parent.style.transform = `scale(${currentScale})`;
     parent.style.transformOrigin = "top center";
 
-    // 갈색 바닥 높이 고정 (랭킹과 문구가 들어갈 높이)
-    floor.style.height = "40px";
+    if (floor) floor.style.height = "0px";
 
     Render.setPixelRatio(render, Math.min(window.devicePixelRatio, 2));
   }
 
   refreshLoop();
-
   init();
 
   window.addEventListener("resize", resize);
@@ -157,6 +157,7 @@
     if (isGameOver) return;
     isClicking = false;
   });
+
   addEventListener("touchend", () => {
     if (isGameOver) return;
     isClicking = false;
@@ -177,6 +178,7 @@
     const rect = canvas.getBoundingClientRect();
     mousePos = (e.clientX - rect.left) / currentScale;
   });
+
   addEventListener("touchmove", (e) => {
     if (isGameOver) return;
     const rect = canvas.getBoundingClientRect();
@@ -197,20 +199,13 @@
     }
   });
 
-  // ================= [테스트용 키보드 입력 - 최대 14레벨 매핑] =================
+  // 키보드 숫자키 입력 테스트 지원
   addEventListener("keydown", (e) => {
     if (isGameOver) return;
 
     const keyMap = {
-      "1": 6,
-      "2": 7,
-      "3": 8,
-      "4": 9,
-      "5": 10,
-      "6": 11,
-      "7": 12,
-      "8": 13,
-      "9": 14,
+      "1": 6, "2": 7, "3": 8, "4": 9, "5": 10,
+      "6": 11, "7": 12, "8": 13, "9": 14,
     };
 
     const targetSize = keyMap[e.key];
@@ -237,7 +232,6 @@
       }, 500);
     }
   });
-  // =========================================================
 
   canvas.addEventListener("mouseover", () => {
     isMouseOver = true;
@@ -270,7 +264,7 @@
     isLineEnable = false;
     const bodies = Composite.allBodies(engine.world);
     for (let i = 4; i < bodies.length; i++) {
-      body = bodies[i];
+      let body = bodies[i];
 
       if (body.position.y < 100) {
         if (
@@ -299,12 +293,12 @@
     if (isGameOver) return;
 
     e.pairs.forEach((collision) => {
-      bodies = [collision.bodyA, collision.bodyB];
+      let bodies = [collision.bodyA, collision.bodyB];
 
       if (bodies[0].size === undefined || bodies[1].size === undefined) return;
 
       if (bodies[0].size === bodies[1].size) {
-        allBodies = Composite.allBodies(engine.world);
+        let allBodies = Composite.allBodies(engine.world);
         if (allBodies.includes(bodies[0]) && allBodies.includes(bodies[1])) {
           if (
             (Date.now() - bodies[0].createdAt < 100 ||
@@ -318,7 +312,6 @@
           World.remove(engine.world, bodies[0]);
           World.remove(engine.world, bodies[1]);
 
-          // 최대 14단계로 제한
           const nextSize = bodies[0].size >= 14 ? 14 : bodies[0].size + 1;
 
           World.add(
@@ -333,7 +326,7 @@
           score += bodies[0].size;
 
           var audio = new Audio("assets/pop.wav");
-          audio.play();
+          audio.play().catch(() => {});
         }
       }
     });
@@ -361,7 +354,7 @@
   });
 
   function writeText(text, textAlign, x, y, size) {
-    ctx.font = `${size}px NanumSquare`;
+    ctx.font = `${size}px NanumSquare, sans-serif`;
     ctx.textAlign = textAlign;
     ctx.lineWidth = size / 8;
 
@@ -370,26 +363,6 @@
 
     ctx.fillStyle = "#fff";
     ctx.fillText(text, x, y);
-  }
-
-  // 아이폰 및 모바일 반응형 리사이징 로직 개편
-  function resize() {
-    canvas.height = 720;
-    canvas.width = 480;
-
-    const scaleX = window.innerWidth / 480;
-    const scaleY = window.innerHeight / 720;
-
-    // 모바일 높이와 폭에 맞춰 비율 자동 계산 (비표준 zoom 속성 제거)
-    currentScale = Math.min(scaleX, scaleY);
-
-    parent.style.zoom = ""; // 기존 zoom 초기화
-    parent.style.transform = `scale(${currentScale})`;
-    parent.style.transformOrigin = "top center";
-
-    floor.style.height = "0px";
-
-    Render.setPixelRatio(render, Math.min(window.devicePixelRatio, 2));
   }
 
   function refreshLoop() {
@@ -410,56 +383,60 @@
     engine.timing.timeScale = 1;
     score = 0;
 
-    gameOverlayer.style.display = "none";
-    document.getElementById("scoreInputModal").style.display = "none";
+    if (gameOverlayer) gameOverlayer.style.display = "none";
+    const modal = document.getElementById("scoreInputModal");
+    if (modal) modal.style.display = "none";
 
     while (engine.world.bodies.length > 4) {
       engine.world.bodies.pop();
     }
 
     createNewBall(1);
+    resize();
   }
 
   function gameOver() {
     isGameOver = true;
     engine.timing.timeScale = 0;
 
-    gameOverlayer.style.display = "flex";
+    if (gameOverlayer) gameOverlayer.style.display = "flex";
 
     if (ball != null) World.remove(engine.world, ball);
 
-    // Top 3 랭킹 판정 (3위보다 점수가 높거나, 랭킹에 3명이 미달일 때)
+    // Top 3 랭킹 판정
     const isTop3 =
       top3Scores.length < 3 || score > top3Scores[top3Scores.length - 1].score;
 
     if (isTop3 && score > 0) {
       const modal = document.getElementById("scoreInputModal");
       const submitBtn = document.getElementById("submitScoreBtn");
-      modal.style.display = "flex";
+      if (modal) modal.style.display = "flex";
 
-      submitBtn.onclick = async () => {
-        const nicknameInput = document.getElementById("nicknameInput");
-        const nickname = nicknameInput.value.trim() || "AAA";
+      if (submitBtn) {
+        submitBtn.onclick = async () => {
+          const nicknameInput = document.getElementById("nicknameInput");
+          const nickname = nicknameInput ? nicknameInput.value.trim() || "AAA" : "AAA";
 
-        submitBtn.disabled = true;
-        submitBtn.textContent = "저장 중...";
+          submitBtn.disabled = true;
+          submitBtn.textContent = "저장 중...";
 
-        try {
-          await db.collection("scores").add({
-            name: nickname,
-            score: score,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          });
+          try {
+            await db.collection("scores").add({
+              name: nickname,
+              score: score,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            });
 
-          modal.style.display = "none";
-          loadTopScores();
-        } catch (error) {
-          console.error("점수 저장 실패:", error);
-          alert("점수 저장에 실패했습니다. Firebase Firestore 규칙(Rule)을 확인해주세요!");
-          submitBtn.disabled = false;
-          submitBtn.textContent = "기록 남기기";
-        }
-      };
+            if (modal) modal.style.display = "none";
+            loadTopScores();
+          } catch (error) {
+            console.error("점수 저장 실패:", error);
+            alert("점수 저장에 실패했습니다.");
+            submitBtn.disabled = false;
+            submitBtn.textContent = "기록 남기기";
+          }
+        };
+      }
     }
   }
 
@@ -475,7 +452,7 @@
   }
 
   function newBall(x, y, size) {
-    c = Bodies.circle(x, y, size * 10, {
+    const c = Bodies.circle(x, y, size * 10, {
       render: {
         sprite: {
           texture: `assets/img/${size}.png`,

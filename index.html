@@ -33,7 +33,7 @@
     <link rel="icon shortcut" href="assets/img/7.png" type="image/x-icon" />
 
     <style>
-      /* 화면 바깥 스크롤 및 바운스 터치 전면 금지 */
+      /* 화면 스크롤 완전히 방지 */
       html, body {
         width: 100%;
         height: 100%;
@@ -45,11 +45,12 @@
       }
 
       .container {
-        width: 100%;
+        width: 100vw;
         height: 100vh;
         display: flex;
         justify-content: center;
-        align-items: flex-start;
+        align-items: center;
+        overflow: hidden;
       }
 
       #game {
@@ -58,61 +59,39 @@
         flex-direction: column;
         align-items: center;
         justify-content: flex-start;
-        margin: 0 auto;
       }
 
-      /* 갈색 바닥 영역 내부 스타일 (랭킹 + 크레딧 가로 정렬) */
-      #floor {
-        width: 100%;
-        background-color: #b37346; /* 기존 바닥 갈색 */
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0 15px;
-        box-sizing: border-box;
-        color: #fff;
-        font-family: "Pretendard", sans-serif;
-        font-size: 12px;
-        z-index: 10;
-      }
-
-      /* 갈색 바닥 안의 TOP 3 랭킹 가로 배치 */
+      /* TOP 3 랭킹 - 상단 우측에 슬림하게 고정 */
       #leaderboard {
-        display: flex;
-        align-items: center;
-        gap: 8px;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.75);
+        color: #fff;
+        padding: 6px 12px;
+        border-radius: 10px;
+        font-family: "Pretendard", sans-serif;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        z-index: 100;
+        pointer-events: none; /* 클릭 방해 금지 */
       }
       #leaderboard h3 {
-        margin: 0;
-        font-size: 12px;
+        margin: 0 0 4px 0;
+        font-size: 11px;
         color: #ffd700;
-        white-space: nowrap;
+        text-align: center;
       }
       #leaderboard ol {
-        display: flex;
-        flex-direction: row;
-        gap: 10px;
         margin: 0;
-        padding: 0;
-        list-style: none;
+        padding-left: 16px;
+        font-size: 11px;
       }
       #leaderboard li {
-        margin: 0;
-        white-space: nowrap;
-        background: rgba(0, 0, 0, 0.25);
-        padding: 2px 6px;
-        border-radius: 4px;
-      }
-
-      .credit-text {
-        margin: 0;
-        font-size: 11px;
-        opacity: 0.9;
+        margin-bottom: 2px;
         white-space: nowrap;
       }
 
-      /* 오버레이 및 팝업 정돈 */
+      /* 오버레이 레이아웃 */
       #overlay {
         display: flex;
         flex-direction: column;
@@ -122,6 +101,7 @@
         padding-top: 100px;
       }
 
+      /* 닉네임 입력 팝업 스타일 */
       #scoreInputModal {
         display: none;
         flex-direction: column;
@@ -173,6 +153,14 @@
   <body>
     <div class="container">
       <div class="item" id="game">
+        <!-- Top 3 전광판 (게임 영역 안 상단 오른쪽) -->
+        <div id="leaderboard">
+          <h3>🏆 TOP 3</h3>
+          <ol id="rankList">
+            <li>불러오는 중...</li>
+          </ol>
+        </div>
+
         <div id="overlay">
           <!-- 닉네임 입력 폼 -->
           <div id="scoreInputModal">
@@ -194,19 +182,9 @@
           </button>
         </div>
 
-        <!-- 게임 캔버스 -->
         <canvas id="canvas"></canvas>
-
-        <!-- 갈색 바닥 (랭킹 가로 배치 + Made by 문구 통합) -->
-        <div id="floor">
-          <div id="leaderboard">
-            <h3>🏆 TOP 3</h3>
-            <ol id="rankList">
-              <li>불러오는 중...</li>
-            </ol>
-          </div>
-          <p class="credit-text">Made by ❤️ yangchi</p>
-        </div>
+        <div id="floor"></div>
+        <p style="margin: 5px 0 0 0; font-size: 12px; color: #333;">Made by ❤️ yangchi</p>
       </div>
     </div>
 
