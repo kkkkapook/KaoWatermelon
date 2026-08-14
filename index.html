@@ -17,6 +17,10 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
 
+    <!-- Firebase SDK (Compat 모드) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
     <title>토체체토</title>
 
     <meta property="og:type" content="website" />
@@ -27,23 +31,134 @@
     <meta property="og:image:type" content="image/png" />
 
     <link rel="icon shortcut" href="assets/img/7.png" type="image/x-icon" />
+
+    <style>
+      /* Top 3 전광판 스타일 */
+      #leaderboard {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        padding: 15px 20px;
+        border-radius: 12px;
+        font-family: "Pretendard", sans-serif;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        z-index: 100;
+        min-width: 180px;
+      }
+      #leaderboard h3 {
+        margin: 0 0 10px 0;
+        font-size: 16px;
+        color: #ffd700;
+        text-align: center;
+      }
+      #leaderboard ol {
+        margin: 0;
+        padding-left: 20px;
+        font-size: 14px;
+      }
+      #leaderboard li {
+        margin-bottom: 5px;
+      }
+
+      /* 오버레이 내부 레이아웃 정돈 */
+      #overlay {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        padding-top: 100px; /* Game Over 텍스트 공간 확보 */
+      }
+
+      /* 닉네임 입력 팝업 스타일 */
+      #scoreInputModal {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        background: rgba(0, 0, 0, 0.9);
+        padding: 20px 25px;
+        border-radius: 16px;
+        z-index: 200;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+      }
+      #scoreInputModal input {
+        padding: 10px 14px;
+        font-size: 16px;
+        border-radius: 8px;
+        border: 2px solid #555;
+        outline: none;
+        text-align: center;
+        width: 180px;
+        background: #222;
+        color: #fff;
+      }
+      #scoreInputModal input:focus {
+        border-color: #39af3d;
+      }
+      #submitScoreBtn {
+        padding: 10px 20px;
+        font-size: 15px;
+        font-weight: bold;
+        background: #39af3d;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 100%;
+        transition: background 0.2s;
+      }
+      #submitScoreBtn:hover {
+        background: #2e8c31;
+      }
+
+      #playAgainButton {
+        margin-top: 10px;
+        z-index: 150;
+      }
+    </style>
   </head>
 
   <body>
+    <!-- Top 3 전광판 -->
+    <div id="leaderboard">
+      <h3>🏆 TOP 3 랭킹</h3>
+      <ol id="rankList">
+        <li>불러오는 중...</li>
+      </ol>
+    </div>
+
     <div class="container">
       <div class="item"></div>
 
-<div class="item" id="game">
-  <div id="overlay">
-    <button id="playAgainButton" onclick="location.reload()">
-      Play Again
-    </button>
-  </div>
-  <canvas id="canvas"></canvas>
-  <div id="floor"></div>
-  <p>Made by ❤️ yangchi</p>
-</div>
-</div>
+      <div class="item" id="game">
+        <div id="overlay">
+          <!-- 닉네임 입력 폼 -->
+          <div id="scoreInputModal">
+            <p style="margin: 0; color: #ffd700; font-weight: bold; font-size: 18px;">
+              🎉 TOP 3 달성!
+            </p>
+            <input
+              type="text"
+              id="nicknameInput"
+              maxlength="6"
+              placeholder="닉네임 (최대 6자)"
+            />
+            <button id="submitScoreBtn">기록 남기기</button>
+          </div>
+
+          <!-- Play Again 버튼 (입력창 아래로 안전하게 위치) -->
+          <button id="playAgainButton" onclick="location.reload()">
+            Play Again
+          </button>
+        </div>
+        <canvas id="canvas"></canvas>
+        <div id="floor"></div>
+        <p>Made by ❤️ yangchi</p>
+      </div>
+    </div>
 
     <script defer src="index.js"></script>
   </body>
