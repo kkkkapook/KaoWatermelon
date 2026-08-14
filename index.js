@@ -1,5 +1,8 @@
+// 모바일 웹 화면 끌림 / 스크롤 완전 방지
+document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
+
 (() => {
-  // ================= [Firebase 초기화] =================
+  // ================= [Firebase 초기화 & 랭킹 팝업 제어] =================
   const firebaseConfig = {
     apiKey: "AIzaSyACFXrDzGWmGCi84MIdoo_S4aLMWQX_brs",
     authDomain: "watermelon-game-3109f.firebaseapp.com",
@@ -9,9 +12,14 @@
     appId: "1:633308554874:web:893dccbb17199bf6a17dc3"
   };
 
-  firebase.initializeApp(firebaseConfig);
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
   const db = firebase.firestore();
-  let top3Scores = [];
+
+  const rankModal = document.getElementById("leaderboardModal");
+  const rankBtn = document.getElementById("rankToggleBtn");
+  const closeBtn = document.getElementById("closeModalBtn");
 
   function loadTopScores() {
     db.collection("scores")
@@ -19,7 +27,6 @@
       .limit(3)
       .get()
       .then((snapshot) => {
-        top3Scores = [];
         const rankListEl = document.getElementById("rankList");
         if (!rankListEl) return;
         rankListEl.innerHTML = "";
@@ -31,9 +38,8 @@
 
         snapshot.forEach((doc) => {
           const data = doc.data();
-          top3Scores.push(data);
           const li = document.createElement("li");
-          li.textContent = `${data.name}: ${data.score}점`;
+          li.textContent = `${data.name || "익명"}: ${data.score}점`;
           rankListEl.appendChild(li);
         });
       })
@@ -42,8 +48,28 @@
       });
   }
 
-  loadTopScores();
-  // =====================================================
+  if (rankBtn && rankModal) {
+    rankBtn.addEventListener("click", () => {
+      loadTopScores();
+      rankModal.style.display = "flex";
+    });
+  }
+
+  if (closeBtn && rankModal) {
+    closeBtn.addEventListener("click", () => {
+      rankModal.style.display = "none";
+    });
+  }
+
+  // 모달 바깥 어두운 배경 클릭 시 닫기
+  if (rankModal) {
+    rankModal.addEventListener("click", (e) => {
+      if (e.target === rankModal) {
+        rankModal.style.display = "none";
+      }
+    });
+  }
+  // =====================================================================
 
   const Engine = Matter.Engine,
     Render = Matter.Render,
@@ -59,6 +85,7 @@
   const floor = document.getElementById("floor");
 
   const ctx = canvas.getContext("2d");
+
   const engine = Engine.create();
 
   const render = Render.create({
@@ -81,17 +108,18 @@
 
   let isGameOver = false;
   let score = 0;
-  let ball = null;
 
   let isLineEnable = false;
-  let currentScale = 1;
 
   const background = Bodies.rectangle(240, 360, 480, 720, {
     isStatic: true,
     render: { fillStyle: "#fe9" },
   });
-  background.collisionFilter = { group: 0, category: 1, mask: -2 };
-
+  background.collisionFilter = {
+    group: 0,
+    category: 1,
+    mask: -2,
+  };
   const ground = Bodies.rectangle(400, 1220, 810, 1000, {
     isStatic: true,
     render: { fillStyle: "transparent" },
@@ -104,81 +132,70 @@
     isStatic: true,
     render: { fillStyle: "transparent" },
   });
-
   World.add(engine.world, [wallLeft, wallRight, ground, background]);
 
   Engine.run(engine);
   Render.run(render);
 
-  // PC/모바일 대응 스케일 계산
-  function resize() {
-    canvas.height = 720;
-    canvas.width = 480;
-
-    const targetWidth = 480;
-    const targetHeight = 820; // 캔버스(720) + 하단 바닥 레이어 높이 고려
-
-    const scaleX = window.innerWidth / targetWidth;
-    const scaleY = window.innerHeight / targetHeight;
-
-    // 모바일 등 작을 때만 줄여주고, PC에서는 최대 1배율로 중앙 고정
-    currentScale = Math.min(scaleX, scaleY, 1);
-
-    parent.style.transform = `scale(${currentScale})`;
-    
-    // 갈색 바닥 고정 높이
-    if (floor) floor.style.height = "100px";
-
-    Render.setPixelRatio(render, Math.min(window.devicePixelRatio, 2));
-  }
+  resize();
 
   refreshLoop();
+
   init();
 
   window.addEventListener("resize", resize);
 
   addEventListener("mousedown", () => {
     if (isGameOver) return;
+
     isClicking = isMouseOver;
   });
-
   addEventListener("touchstart", (e) => {
     if (isGameOver) return;
+
     isClicking = true;
-    const rect = canvas.getBoundingClientRect();
-    mousePos = (e.touches[0].clientX - rect.left) / currentScale;
+    mousePos = e.touches[0].clientX / parent.style.zoom;
   });
 
   addEventListener("mouseup", () => {
     if (isGameOver) return;
+
     isClicking = false;
   });
-
   addEventListener("touchend", () => {
     if (isGameOver) return;
+
     isClicking = false;
+
+    if (isGameOver) return;
 
     if (ball != null) {
       ball.createdAt = 0;
-      ball.collisionFilter = { group: 0, category: 1, mask: -1 };
+      ball.collisionFilter = {
+        group: 0,
+        category: 1,
+        mask: -1,
+      };
       Body.setVelocity(ball, { x: 0, y: (100 / fps) * 5.5 });
       ball = null;
 
       newSize = Math.ceil(Math.random() * 3);
+
       setTimeout(() => createNewBall(newSize), 500);
     }
   });
 
   addEventListener("mousemove", (e) => {
     if (isGameOver) return;
-    const rect = canvas.getBoundingClientRect();
-    mousePos = (e.clientX - rect.left) / currentScale;
-  });
 
+    const rect = canvas.getBoundingClientRect();
+    mousePos = e.clientX / parent.style.zoom - rect.left;
+  });
   addEventListener("touchmove", (e) => {
     if (isGameOver) return;
+
     const rect = canvas.getBoundingClientRect();
-    mousePos = (e.touches[0].clientX - rect.left) / currentScale;
+    mousePos = e.touches[0].clientX / parent.style.zoom - rect.left;
   });
 
   addEventListener("click", () => {
@@ -186,17 +203,27 @@
 
     if (ball != null) {
       ball.createdAt = 0;
-      ball.collisionFilter = { group: 0, category: 1, mask: -1 };
+      ball.collisionFilter = {
+        group: 0,
+        category: 1,
+        mask: -1,
+      };
       Body.setVelocity(ball, { x: 0, y: (100 / fps) * 5.5 });
       ball = null;
 
       newSize = Math.ceil(Math.random() * 3);
+
       setTimeout(() => createNewBall(newSize), 500);
     }
   });
 
-  canvas.addEventListener("mouseover", () => { isMouseOver = true; });
-  canvas.addEventListener("mouseout", () => { isMouseOver = false; });
+  canvas.addEventListener("mouseover", () => {
+    isMouseOver = true;
+  });
+
+  canvas.addEventListener("mouseout", () => {
+    isMouseOver = false;
+  });
 
   Events.on(engine, "beforeUpdate", () => {
     if (isGameOver) return;
@@ -210,6 +237,7 @@
 
       if (isClicking && mousePos !== undefined) {
         ball.position.x = mousePos;
+
         if (mousePos > 455) ball.position.x = 455;
         else if (mousePos < 25) ball.position.x = 25;
       }
@@ -220,7 +248,7 @@
     isLineEnable = false;
     const bodies = Composite.allBodies(engine.world);
     for (let i = 4; i < bodies.length; i++) {
-      let body = bodies[i];
+      body = bodies[i];
 
       if (body.position.y < 100) {
         if (
@@ -249,12 +277,12 @@
     if (isGameOver) return;
 
     e.pairs.forEach((collision) => {
-      let bodies = [collision.bodyA, collision.bodyB];
+      bodies = [collision.bodyA, collision.bodyB];
 
       if (bodies[0].size === undefined || bodies[1].size === undefined) return;
 
       if (bodies[0].size === bodies[1].size) {
-        let allBodies = Composite.allBodies(engine.world);
+        allBodies = Composite.allBodies(engine.world);
         if (allBodies.includes(bodies[0]) && allBodies.includes(bodies[1])) {
           if (
             (Date.now() - bodies[0].createdAt < 100 ||
@@ -268,21 +296,19 @@
           World.remove(engine.world, bodies[0]);
           World.remove(engine.world, bodies[1]);
 
-          const nextSize = bodies[0].size >= 14 ? 14 : bodies[0].size + 1;
-
           World.add(
             engine.world,
             newBall(
               (bodies[0].position.x + bodies[1].position.x) / 2,
               (bodies[0].position.y + bodies[1].position.y) / 2,
-              nextSize
+              bodies[0].size === 13 ? 13 : bodies[0].size + 1
             )
           );
 
           score += bodies[0].size;
 
           var audio = new Audio("assets/pop.wav");
-          audio.play().catch(() => {});
+          audio.play();
         }
       }
     });
@@ -294,8 +320,8 @@
       ctx.rect(0, 0, 480, 720);
       ctx.fill();
 
-      writeText("Game Over", "center", 240, 240, 50);
-      writeText("Score: " + score, "center", 240, 280, 30);
+      writeText("Game Over", "center", 240, 280, 50);
+      writeText("Score: " + score, "center", 240, 320, 30);
     } else {
       writeText(score, "start", 25, 60, 40);
 
@@ -310,7 +336,7 @@
   });
 
   function writeText(text, textAlign, x, y, size) {
-    ctx.font = `${size}px NanumSquare, sans-serif`;
+    ctx.font = `${size}px NanumSquare`;
     ctx.textAlign = textAlign;
     ctx.lineWidth = size / 8;
 
@@ -319,6 +345,28 @@
 
     ctx.fillStyle = "#fff";
     ctx.fillText(text, x, y);
+  }
+
+  function resize() {
+    canvas.height = 720;
+    canvas.width = 480;
+
+    if (isMobile()) {
+      parent.style.zoom = window.innerWidth / 480;
+      parent.style.top = "0px";
+
+      floor.style.height = `${
+        (window.innerHeight - canvas.height * parent.style.zoom) /
+        parent.style.zoom
+      }px`;
+    } else {
+      parent.style.zoom = window.innerHeight / 720 / 1.3;
+      parent.style.top = `${(canvas.height * parent.style.zoom) / 15}px`;
+
+      floor.style.height = "50px";
+    }
+
+    Render.setPixelRatio(render, parent.style.zoom * 2);
   }
 
   function refreshLoop() {
@@ -333,66 +381,32 @@
     });
   }
 
+  function isMobile() {
+    return window.innerHeight / window.innerWidth >= 1.49;
+  }
+
   function init() {
     isGameOver = false;
     ball = null;
     engine.timing.timeScale = 1;
     score = 0;
 
-    if (gameOverlayer) gameOverlayer.style.display = "none";
-    const modal = document.getElementById("scoreInputModal");
-    if (modal) modal.style.display = "none";
+    gameOverlayer.style.display = "none";
 
     while (engine.world.bodies.length > 4) {
       engine.world.bodies.pop();
     }
 
     createNewBall(1);
-    resize();
   }
 
   function gameOver() {
     isGameOver = true;
     engine.timing.timeScale = 0;
 
-    if (gameOverlayer) gameOverlayer.style.display = "flex";
+    gameOverlayer.style.display = "";
 
     if (ball != null) World.remove(engine.world, ball);
-
-    const isTop3 =
-      top3Scores.length < 3 || score > top3Scores[top3Scores.length - 1].score;
-
-    if (isTop3 && score > 0) {
-      const modal = document.getElementById("scoreInputModal");
-      const submitBtn = document.getElementById("submitScoreBtn");
-      if (modal) modal.style.display = "flex";
-
-      if (submitBtn) {
-        submitBtn.onclick = async () => {
-          const nicknameInput = document.getElementById("nicknameInput");
-          const nickname = nicknameInput ? nicknameInput.value.trim() || "AAA" : "AAA";
-
-          submitBtn.disabled = true;
-          submitBtn.textContent = "저장 중...";
-
-          try {
-            await db.collection("scores").add({
-              name: nickname,
-              score: score,
-              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            });
-
-            if (modal) modal.style.display = "none";
-            loadTopScores();
-          } catch (error) {
-            console.error("점수 저장 실패:", error);
-            alert("점수 저장에 실패했습니다.");
-            submitBtn.disabled = false;
-            submitBtn.textContent = "기록 남기기";
-          }
-        };
-      }
-    }
   }
 
   function createNewBall(size) {
@@ -407,7 +421,7 @@
   }
 
   function newBall(x, y, size) {
-    const c = Bodies.circle(x, y, size * 10, {
+    c = Bodies.circle(x, y, size * 10, {
       render: {
         sprite: {
           texture: `assets/img/${size}.png`,

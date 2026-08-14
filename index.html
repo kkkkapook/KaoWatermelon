@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
     />
 
     <link href="index.css" rel="stylesheet" />
@@ -17,7 +17,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
 
-    <!-- Firebase SDK (Compat 모드) -->
+    <!-- Firebase SDK (compat) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
@@ -31,177 +31,39 @@
     <meta property="og:image:type" content="image/png" />
 
     <link rel="icon shortcut" href="assets/img/7.png" type="image/x-icon" />
-
-    <style>
-      html, body {
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-        touch-action: none;
-        background-color: #000000; /* PC 바깥 배경은 검은색 */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-
-      /* PC / 모바일 공통 중앙 컨테이너 */
-      #game {
-        position: relative;
-        width: 480px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        transform-origin: center center;
-      }
-
-      /* TOP 3 랭킹 */
-      #leaderboard {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        background: rgba(0, 0, 0, 0.75);
-        color: #fff;
-        padding: 8px 12px;
-        border-radius: 10px;
-        font-family: "Pretendard", sans-serif;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        z-index: 100;
-        pointer-events: none;
-      }
-      #leaderboard h3 {
-        margin: 0 0 4px 0;
-        font-size: 12px;
-        color: #ffd700;
-        text-align: center;
-      }
-      #leaderboard ol {
-        margin: 0;
-        padding-left: 16px;
-        font-size: 11px;
-      }
-      #leaderboard li {
-        margin-bottom: 2px;
-        white-space: nowrap;
-      }
-
-      /* 갈색 바닥 레이어 (기존 원본 비율 복원) */
-      #floor {
-        width: 100%;
-        background-color: #b37346;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-
-      /* 게임 오버 레이어 및 모달 */
-      #overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 720px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        gap: 20px;
-        z-index: 150;
-      }
-
-      #scoreInputModal {
-        display: none;
-        flex-direction: column;
-        align-items: center;
-        gap: 12px;
-        background: rgba(0, 0, 0, 0.9);
-        padding: 20px 25px;
-        border-radius: 16px;
-        z-index: 200;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-      }
-      #scoreInputModal input {
-        padding: 10px 14px;
-        font-size: 16px;
-        border-radius: 8px;
-        border: 2px solid #555;
-        outline: none;
-        text-align: center;
-        width: 180px;
-        background: #222;
-        color: #fff;
-      }
-      #scoreInputModal input:focus {
-        border-color: #39af3d;
-      }
-      #submitScoreBtn {
-        padding: 10px 20px;
-        font-size: 15px;
-        font-weight: bold;
-        background: #39af3d;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        width: 100%;
-      }
-
-      #playAgainButton {
-        margin-top: 10px;
-        padding: 12px 24px;
-        font-size: 16px;
-        font-weight: bold;
-        background: #ff5252;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-      }
-
-      .credit-text {
-        margin: 10px 0;
-        font-size: 13px;
-        font-family: "Pretendard", sans-serif;
-        color: #fff;
-        font-weight: bold;
-      }
-    </style>
   </head>
 
   <body>
-    <div id="game">
-      <!-- TOP 3 랭킹 -->
-      <div id="leaderboard">
-        <h3>🏆 TOP 3</h3>
+    <div class="container">
+      <div class="item"></div>
+
+      <div class="item" id="game">
+        <div id="overlay">
+          <button id="playAgainButton" onclick="location.reload()">
+            Play Again
+          </button>
+        </div>
+
+        <canvas id="canvas"></canvas>
+
+        <!-- 갈색 영역: 좌측 텍스트 / 우측 랭킹 버튼 -->
+        <div id="floor">
+          <p>Made by ❤️ yangchi</p>
+          <button id="rankToggleBtn">🏆 Top 3</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top 3 랭킹 팝업 모달 -->
+    <div id="leaderboardModal" class="modal-overlay" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>🏆 Top 3 랭킹</h3>
+          <button id="closeModalBtn">&times;</button>
+        </div>
         <ol id="rankList">
           <li>불러오는 중...</li>
         </ol>
-      </div>
-
-      <!-- 게임 오버 및 랭킹 입력 모달 -->
-      <div id="overlay">
-        <div id="scoreInputModal">
-          <p style="margin: 0; color: #ffd700; font-weight: bold; font-size: 18px;">
-            🎉 TOP 3 달성!
-          </p>
-          <input
-            type="text"
-            id="nicknameInput"
-            maxlength="6"
-            placeholder="닉네임 (최대 6자)"
-          />
-          <button id="submitScoreBtn">기록 남기기</button>
-        </div>
-
-        <button id="playAgainButton" onclick="location.reload()">
-          Play Again
-        </button>
-      </div>
-
-      <canvas id="canvas"></canvas>
-      <div id="floor">
-        <p class="credit-text">Made by ❤️ yangchi</p>
       </div>
     </div>
 

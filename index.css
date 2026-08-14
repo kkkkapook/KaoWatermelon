@@ -1,5 +1,6 @@
 html {
   height: 100%;
+  overflow: hidden;
 }
 
 body {
@@ -12,6 +13,11 @@ body {
 
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+
+  overflow: hidden;
+  touch-action: none;
+  position: fixed;
+  width: 100%;
 }
 
 .container {
@@ -59,11 +65,118 @@ button * {
   border-radius: 25px 25px 0 0;
 }
 
+/* ===== 갈색 영역 내부 양끝 정렬 ===== */
 #floor {
   width: 480px;
   background: #b37b50;
-
   border-radius: 0 0 25px 25px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+#floor p {
+  margin: 0;
+  color: white;
+  font-size: 14px;
+  line-height: normal;
+  font-weight: 500;
+}
+
+#rankToggleBtn {
+  background: #39af3d; /* 쨍한 형광초록 배경 */
+  color: #ffffff;      /* 또렷한 흰색 텍스트 */
+  border: none;
+  border-radius: 0;   /* 직각 네모 프레임 */
+  
+  /* 텍스트 크기에 딱 맞춘 타이트한 여백 및 사이즈 */
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: bold;
+  
+  width: auto;         /* 컨테이너 버튼 스타일 무시하고 내용에 맞춤 */
+  height: auto;
+  
+  cursor: pointer;
+  line-height: normal;
+  
+  /* 클릭감(입체감)을 주는 가벼운 그림자 효과 */
+  box-shadow: 0 2px 0 #287d2b;
+  transition: all 0.1s ease;
+}
+
+#rankToggleBtn:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 #287d2b;
+}
+
+/* ===== Top 3 팝업 모달 스타일 ===== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+}
+
+.modal-content {
+  background: #222;
+  border: 1px solid #444;
+  border-radius: 16px;
+  width: 280px;
+  padding: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  color: #fff;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 10px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #ffd700;
+}
+
+#closeModalBtn {
+  background: transparent;
+  border: none;
+  color: #aaa;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 0;
+  width: auto;
+  height: auto;
+}
+
+#closeModalBtn:hover {
+  color: #fff;
+}
+
+#rankList {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+#rankList li {
+  margin-bottom: 6px;
 }
 
 #overlay {
