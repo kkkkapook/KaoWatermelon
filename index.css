@@ -169,7 +169,7 @@ button * {
   list-style: none;
   font-size: 14px;
   overflow-y: auto;
-  max-height: 280px;
+  max-height: 450px;
   display: flex;
   flex-direction: column;
   gap: 6px;
