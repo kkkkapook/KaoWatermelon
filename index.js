@@ -86,6 +86,9 @@
 
   let isLineEnable = false;
 
+  // 터치/마우스 좌표 수정을 위한 스케일 변수
+  let currentScale = 1;
+
   const background = Bodies.rectangle(240, 360, 480, 720, {
     isStatic: true,
     render: { fillStyle: "#fe9" },
@@ -124,10 +127,13 @@
     if (isGameOver) return;
     isClicking = isMouseOver;
   });
+
+  // 아이폰/모바일 좌표 계산 보정
   addEventListener("touchstart", (e) => {
     if (isGameOver) return;
     isClicking = true;
-    mousePos = e.touches[0].clientX / parent.style.zoom;
+    const rect = canvas.getBoundingClientRect();
+    mousePos = (e.touches[0].clientX - rect.left) / currentScale;
   });
 
   addEventListener("mouseup", () => {
@@ -152,12 +158,12 @@
   addEventListener("mousemove", (e) => {
     if (isGameOver) return;
     const rect = canvas.getBoundingClientRect();
-    mousePos = e.clientX / parent.style.zoom - rect.left;
+    mousePos = (e.clientX - rect.left) / currentScale;
   });
   addEventListener("touchmove", (e) => {
     if (isGameOver) return;
     const rect = canvas.getBoundingClientRect();
-    mousePos = e.touches[0].clientX / parent.style.zoom - rect.left;
+    mousePos = (e.touches[0].clientX - rect.left) / currentScale;
   });
 
   addEventListener("click", () => {
@@ -349,26 +355,24 @@
     ctx.fillText(text, x, y);
   }
 
+  // 아이폰 및 모바일 반응형 리사이징 로직 개편
   function resize() {
     canvas.height = 720;
     canvas.width = 480;
 
-    if (isMobile()) {
-      parent.style.zoom = window.innerWidth / 480;
-      parent.style.top = "0px";
+    const scaleX = window.innerWidth / 480;
+    const scaleY = window.innerHeight / 720;
 
-      floor.style.height = `${
-        (window.innerHeight - canvas.height * parent.style.zoom) /
-        parent.style.zoom
-      }px`;
-    } else {
-      parent.style.zoom = window.innerHeight / 720 / 1.3;
-      parent.style.top = `${(canvas.height * parent.style.zoom) / 15}px`;
+    // 모바일 높이와 폭에 맞춰 비율 자동 계산 (비표준 zoom 속성 제거)
+    currentScale = Math.min(scaleX, scaleY);
 
-      floor.style.height = "50px";
-    }
+    parent.style.zoom = ""; // 기존 zoom 초기화
+    parent.style.transform = `scale(${currentScale})`;
+    parent.style.transformOrigin = "top center";
 
-    Render.setPixelRatio(render, parent.style.zoom * 2);
+    floor.style.height = "0px";
+
+    Render.setPixelRatio(render, Math.min(window.devicePixelRatio, 2));
   }
 
   function refreshLoop() {
@@ -381,10 +385,6 @@
       fps = times.length;
       refreshLoop();
     });
-  }
-
-  function isMobile() {
-    return window.innerHeight / window.innerWidth >= 1.49;
   }
 
   function init() {
