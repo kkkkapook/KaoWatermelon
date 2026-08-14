@@ -21,7 +21,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
-    <title>토체체토</title>
+    <title>카푹많관부</title>
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="watermelon" />
@@ -38,9 +38,6 @@
       <div class="item"></div>
 
       <div class="item" id="game">
-        <!-- [테스트용] 우측 상단 강제 종료 버튼 -->
-        <button id="testGameOverBtn">💥 강제종료</button>
-
         <div id="overlay">
           <button id="playAgainButton" onclick="location.reload()">
             Play Again
@@ -50,7 +47,11 @@
         <canvas id="canvas"></canvas>
 
         <div id="floor">
-          <p>Made by ❤️ yangchi</p>
+          <div class="floor-left">
+            <p>Made by ❤️ yangchi</p>
+            <!-- 메이드바이양치 옆에 들어간 작은 원형 강제종료 버튼 -->
+            <button id="testGameOverBtn" title="강제종료">💥</button>
+          </div>
           <button id="rankToggleBtn">🏆 Top 10</button>
         </div>
       </div>

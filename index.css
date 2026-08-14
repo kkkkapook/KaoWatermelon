@@ -62,29 +62,6 @@ button * {
   position: relative;
 }
 
-/* ===== [테스트용] 우측 상단 강제 종료 버튼 ===== */
-#testGameOverBtn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 99;
-  background: #ff4757;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 10px;
-  font-size: 12px;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-  width: auto;
-  height: auto;
-}
-
-#testGameOverBtn:active {
-  transform: scale(0.95);
-}
-
 #canvas {
   border-radius: 25px 25px 0 0;
 }
@@ -102,12 +79,42 @@ button * {
   box-sizing: border-box;
 }
 
+/* 좌측 문구 + 강제종료 버튼 영역 */
+.floor-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 #floor p {
   margin: 0;
   color: white;
   font-size: 14px;
   line-height: normal;
   font-weight: 500;
+}
+
+/* ===== [수정] 메이드바이양치 옆 작은 원형 강제종료 버튼 ===== */
+#testGameOverBtn {
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 50% !important;
+  background: #ff4757 !important;
+  color: white !important;
+  border: none !important;
+  font-size: 12px !important;
+  line-height: 26px !important;
+  padding: 0 !important;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.1s ease;
+}
+
+#testGameOverBtn:active {
+  transform: scale(0.9);
 }
 
 /* ===== Top 10 버튼 ===== */
