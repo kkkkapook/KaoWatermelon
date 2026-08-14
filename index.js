@@ -122,6 +122,16 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
     });
   }
 
+// 하단 바닥 영역(#floor) 또는 그 안의 텍스트를 터치/클릭하면 강제 종료
+  const floorElement = document.querySelector("#floor"); 
+  if (floorElement) {
+    floorElement.addEventListener("click", () => {
+      if (confirm("게임을 강제로 종료하시겠습니까?")) {
+        gameOver();
+      }
+    });
+  }
+
   // =====================================================================
 
   const Engine = Matter.Engine,
