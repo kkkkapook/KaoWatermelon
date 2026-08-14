@@ -262,7 +262,7 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
       Body.setVelocity(ball, { x: 0, y: (100 / fps) * 5.5 });
       ball = null;
 
-      newSize = Math.ceil(Math.random() * 3);
+      newSize = Math.ceil(Math.random() * 4);
 
       setTimeout(() => createNewBall(newSize), 500);
     }
