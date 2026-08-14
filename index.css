@@ -53,9 +53,11 @@ button * {
 #canvas {
   border-radius: 25px 25px 0 0;
   display: block;
+  width: 100%;
+  height: auto;
 }
 
-/* ===== 갈색 바닥 패널 ===== */
+/* ===== 갈색 바닥 패널 (크기 고정) ===== */
 #floor {
   width: 480px;
   height: 55px;
@@ -235,11 +237,11 @@ button * {
   flex-direction: column;
   gap: 10px;
   z-index: 10;
-  pointer-events: none; /* 평소엔 터치 통과 */
+  pointer-events: none;
 }
 
 #overlay button {
-  pointer-events: auto; /* 버튼은 터치 가능 */
+  pointer-events: auto;
 }
 
 #playAgainButton {

@@ -229,7 +229,7 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
       Body.setVelocity(ball, { x: 0, y: (100 / fps) * 5.5 });
       ball = null;
 
-      newSize = Math.ceil(Math.random() * 3);
+      newSize = Math.ceil(Math.random() * 4);
 
       setTimeout(() => createNewBall(newSize), 500);
     }
@@ -402,13 +402,20 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
     canvas.height = 720;
     canvas.width = 480;
 
-    // 화면 비율에 맞춘 깔끔한 줌 스케일링 계산 (상단 짤림 방지)
-    const availableHeight = window.innerHeight - 60; // 바닥 패널 여유 공간 확보
+    // 하단 바닥 패널 높이(약 55px)만 제외하고 화면 세로 공간을 꽉 채우도록 계산
+    const floorHeight = 55;
+    const availableHeight = window.innerHeight - floorHeight;
+    
     const scaleX = window.innerWidth / 480;
     const scaleY = availableHeight / 720;
     
+    // 화면 크기에 맞춰 보드 영역이 최대한 넓게 확장되도록 스케일 설정
     let zoom = Math.min(scaleX, scaleY);
-    if (zoom > 1.2) zoom = 1.2; // 너무 커지는 것 방지용 제한
+    if (window.innerWidth / 480 > scaleY) {
+      zoom = scaleY; // 세로 길이에 맞춰 꽉 차게 조절
+    } else {
+      zoom = scaleX;
+    }
 
     parent.style.zoom = zoom;
     parent.style.top = "0px";
