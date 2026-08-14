@@ -26,7 +26,7 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
   const submitScoreBtn = document.getElementById("submitScoreBtn");
   const finalScoreText = document.getElementById("finalScoreText");
 
-  // Top 10 불러오기 함수
+  // Top 10 불러오기 함수 (순위, 닉네임, 점수 칸 분리형태로 수정됨)
   function loadTopScores(callback) {
     if (!db) return;
     db.collection("scores")
@@ -45,8 +45,16 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
             snapshot.forEach((doc) => {
               const data = doc.data();
               const li = document.createElement("li");
-              li.textContent = `${data.name || "익명"} - ${data.score}점`;
+              
+              // 순위, 닉네임, 점수를 각각 분리해서 깔끔하게 표시
+              li.innerHTML = `
+                <span class="rank-num">${rank}</span>
+                <span class="rank-name">${data.name || "익명"}</span>
+                <span class="rank-score">${data.score}점</span>
+              `;
+              
               rankListEl.appendChild(li);
+              rank++;
             });
           }
         }
@@ -118,16 +126,6 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
     nicknameInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         saveScore(nicknameInput.value, score);
-      }
-    });
-  }
-
-// 하단 바닥 영역(#floor) 또는 그 안의 텍스트를 터치/클릭하면 강제 종료
-  const floorElement = document.querySelector("#floor"); 
-  if (floorElement) {
-    floorElement.addEventListener("click", () => {
-      if (confirm("게임을 강제로 종료하시겠습니까?")) {
-        gameOver();
       }
     });
   }
@@ -413,17 +411,15 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
     canvas.height = 720;
     canvas.width = 480;
 
-    // 하단 바닥 패널 높이(약 55px)만 제외하고 화면 세로 공간을 꽉 채우도록 계산
     const floorHeight = 55;
     const availableHeight = window.innerHeight - floorHeight;
     
     const scaleX = window.innerWidth / 480;
     const scaleY = availableHeight / 720;
     
-    // 화면 크기에 맞춰 보드 영역이 최대한 넓게 확장되도록 스케일 설정
     let zoom = Math.min(scaleX, scaleY);
     if (window.innerWidth / 480 > scaleY) {
-      zoom = scaleY; // 세로 길이에 맞춰 꽉 차게 조절
+      zoom = scaleY;
     } else {
       zoom = scaleX;
     }
@@ -525,4 +521,17 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
 
     return ballBody;
   }
+
+// "Made by 양치" 텍스트 요소나 특정 하단 제작자 영역만 터치/클릭했을 때 게임 강제 종료
+  const makerText = document.querySelector("#floor span") || document.querySelector("#floor"); 
+  if (makerText) {
+    makerText.addEventListener("click", (e) => {
+      // 랭킹 버튼이나 다른 요소를 누른 게 아닐 때만 작동하도록 방어 코드 추가
+      e.stopPropagation(); 
+      if (confirm("게임을 강제로 종료하시겠습니까?")) {
+        gameOver();
+      }
+    });
+  }
+
 })();

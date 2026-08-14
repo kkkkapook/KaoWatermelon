@@ -165,15 +165,55 @@ button * {
 
 #rankList {
   margin: 0;
-  padding-left: 20px;
+  padding: 0;
+  list-style: none;
   font-size: 14px;
-  line-height: 1.8;
   overflow-y: auto;
   max-height: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 #rankList li {
-  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px 12px;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+/* 순위 영역 (왼쪽 고정 너비) */
+.rank-num {
+  width: 32px;
+  font-weight: bold;
+  color: #ffd700;
+  text-align: center;
+}
+
+/* 상위 1~3위 특별 색상 (선택사항) */
+#rankList li:nth-child(1) .rank-num { color: #ff4757; }
+#rankList li:nth-child(2) .rank-num { color: #ffa502; }
+#rankList li:nth-child(3) .rank-num { color: #2ed573; }
+
+/* 닉네임 영역 (남은 공간을 채우고 말줄임 처리) */
+.rank-name {
+  flex: 1;
+  padding: 0 10px;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+/* 점수 영역 (오른쪽 정렬) */
+.rank-score {
+  font-weight: bold;
+  color: #00d2d3;
+  text-align: right;
+  min-width: 50px;
 }
 
 /* ===== 닉네임 입력 모달 스타일 ===== */
