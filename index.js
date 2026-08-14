@@ -67,6 +67,7 @@
       width: 480,
       height: 720,
       wireframes: false,
+      background: "#fce885", // 캔버스 기본 배경색 지정
     },
   });
 
@@ -85,14 +86,7 @@
   let isLineEnable = false;
   let currentScale = 1;
 
-  // 노란 배경
-  const background = Bodies.rectangle(240, 360, 480, 720, {
-    isStatic: true,
-    render: { fillStyle: "#fe9" },
-  });
-  background.collisionFilter = { group: 0, category: 1, mask: -2 };
-
-  // 갈색 물리 바닥 (화면에 일치하도록 720px 지점에 정확하게 배치)
+  // 갈색 물리 바닥 (화면 맨 아래 40px 영역)
   const ground = Bodies.rectangle(240, 700, 480, 40, {
     isStatic: true,
     render: { fillStyle: "#b37346" },
@@ -107,12 +101,11 @@
     render: { fillStyle: "transparent" },
   });
 
-  World.add(engine.world, [wallLeft, wallRight, ground, background]);
+  World.add(engine.world, [wallLeft, wallRight, ground]);
 
   Engine.run(engine);
   Render.run(render);
 
-  // 화면 스케일링 함수
   function resize() {
     canvas.height = 720;
     canvas.width = 480;
@@ -215,7 +208,7 @@
 
     isLineEnable = false;
     const bodies = Composite.allBodies(engine.world);
-    for (let i = 4; i < bodies.length; i++) {
+    for (let i = 3; i < bodies.length; i++) {
       let body = bodies[i];
 
       if (body.position.y < 100) {
@@ -339,7 +332,7 @@
     const modal = document.getElementById("scoreInputModal");
     if (modal) modal.style.display = "none";
 
-    while (engine.world.bodies.length > 4) {
+    while (engine.world.bodies.length > 3) {
       engine.world.bodies.pop();
     }
 
