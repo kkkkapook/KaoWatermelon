@@ -79,42 +79,12 @@ button * {
   box-sizing: border-box;
 }
 
-/* 좌측 문구 + 강제종료 버튼 영역 */
-.floor-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 #floor p {
   margin: 0;
   color: white;
   font-size: 14px;
   line-height: normal;
   font-weight: 500;
-}
-
-/* ===== [수정] 메이드바이양치 옆 작은 원형 강제종료 버튼 ===== */
-#testGameOverBtn {
-  width: 26px !important;
-  height: 26px !important;
-  border-radius: 50% !important;
-  background: #ff4757 !important;
-  color: white !important;
-  border: none !important;
-  font-size: 12px !important;
-  line-height: 26px !important;
-  padding: 0 !important;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: transform 0.1s ease;
-}
-
-#testGameOverBtn:active {
-  transform: scale(0.9);
 }
 
 /* ===== Top 10 버튼 ===== */

@@ -26,8 +26,6 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
   const submitScoreBtn = document.getElementById("submitScoreBtn");
   const finalScoreText = document.getElementById("finalScoreText");
 
-  const testGameOverBtn = document.getElementById("testGameOverBtn");
-
   // Top 10 불러오기 함수
   function loadTopScores(callback) {
     if (!db) return;
@@ -123,13 +121,6 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
     });
   }
 
-  // [수정] 하단 바닥 패널로 이동한 강제 종료 버튼 클릭 이벤트 처리
-  if (testGameOverBtn) {
-    testGameOverBtn.addEventListener("click", (e) => {
-      e.stopPropagation(); // 이벤트 버블링 방지
-      gameOver();
-    });
-  }
   // =====================================================================
 
   const Engine = Matter.Engine,
