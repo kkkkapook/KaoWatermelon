@@ -67,6 +67,20 @@
       </div>
     </div>
 
+    <!-- 닉네임 입력 팝업 모달 -->
+    <div id="nicknameModal" class="modal-overlay" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>🎉 Game Over!</h3>
+        </div>
+        <div class="modal-body">
+          <p id="finalScoreText">최종 점수: 0점</p>
+          <input type="text" id="nicknameInput" placeholder="닉네임을 입력하세요" maxlength="10" />
+          <button id="submitScoreBtn">점수 등록</button>
+        </div>
+      </div>
+    </div>
+
     <script defer src="index.js"></script>
   </body>
 </html>

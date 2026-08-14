@@ -2,7 +2,7 @@
 document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
 
 (() => {
-  // ================= [Firebase 초기화 & 랭킹 팝업 제어] =================
+  // ================= [Firebase 초기화 & 랭킹/점수 등록 제어] =================
   const firebaseConfig = {
     apiKey: "AIzaSyACFXrDzGWmGCi84MIdoo_S4aLMWQX_brs",
     authDomain: "watermelon-game-3109f.firebaseapp.com",
@@ -21,6 +21,12 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
   const rankBtn = document.getElementById("rankToggleBtn");
   const closeBtn = document.getElementById("closeModalBtn");
 
+  const nicknameModal = document.getElementById("nicknameModal");
+  const nicknameInput = document.getElementById("nicknameInput");
+  const submitScoreBtn = document.getElementById("submitScoreBtn");
+  const finalScoreText = document.getElementById("finalScoreText");
+
+  // Top 3 불러오기 함수
   function loadTopScores() {
     db.collection("scores")
       .orderBy("score", "desc")
@@ -48,6 +54,30 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
       });
   }
 
+  // 점수 저장 함수
+  function saveScore(nickname, currentScore) {
+    if (!nickname || nickname.trim() === "") {
+      nickname = "익명";
+    }
+
+    db.collection("scores")
+      .add({
+        name: nickname.trim(),
+        score: currentScore,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      })
+      .then(() => {
+        alert("점수가 등록되었습니다!");
+        if (nicknameModal) nicknameModal.style.display = "none";
+        loadTopScores();
+      })
+      .catch((err) => {
+        console.error("점수 등록 실패:", err);
+        alert("점수 등록 중 오류가 발생했습니다.");
+      });
+  }
+
+  // Top 3 팝업 열기/닫기
   if (rankBtn && rankModal) {
     rankBtn.addEventListener("click", () => {
       loadTopScores();
@@ -61,11 +91,27 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
     });
   }
 
-  // 모달 바깥 어두운 배경 클릭 시 닫기
   if (rankModal) {
     rankModal.addEventListener("click", (e) => {
       if (e.target === rankModal) {
         rankModal.style.display = "none";
+      }
+    });
+  }
+
+  // 닉네임 점수 등록 버튼 클릭
+  if (submitScoreBtn) {
+    submitScoreBtn.addEventListener("click", () => {
+      const val = nicknameInput ? nicknameInput.value : "";
+      saveScore(val, score);
+    });
+  }
+
+  // 엔터 키로도 점수 제출 가능
+  if (nicknameInput) {
+    nicknameInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        saveScore(nicknameInput.value, score);
       }
     });
   }
@@ -166,8 +212,6 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
     if (isGameOver) return;
 
     isClicking = false;
-
-    if (isGameOver) return;
 
     if (ball != null) {
       ball.createdAt = 0;
@@ -400,13 +444,29 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
     createNewBall(1);
   }
 
+  // ===== 게임 오버 처리 및 인게임 커스텀 팝업 =====
   function gameOver() {
+    if (isGameOver) return;
+    
     isGameOver = true;
     engine.timing.timeScale = 0;
 
     gameOverlayer.style.display = "";
 
     if (ball != null) World.remove(engine.world, ball);
+
+    // 딜레이 후 커스텀 닉네임 입력 모달 띄우기
+    setTimeout(() => {
+      if (finalScoreText) {
+        finalScoreText.textContent = `최종 점수: ${score}점`;
+      }
+      if (nicknameInput) {
+        nicknameInput.value = "";
+      }
+      if (nicknameModal) {
+        nicknameModal.style.display = "flex";
+      }
+    }, 400);
   }
 
   function createNewBall(size) {
@@ -437,4 +497,30 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
 
     return c;
   }
+
+  // ================= [테스트용 1~10레벨 과일 스폰 단축키 (1~9, 0)] =================
+  window.addEventListener("keydown", (e) => {
+    if (isGameOver) return;
+
+    if (/^[0-9]$/.test(e.key)) {
+      const keyNum = parseInt(e.key, 10);
+      const targetSize = keyNum === 0 ? 10 : keyNum;
+
+      if (ball != null) {
+        const currentX = ball.position.x;
+        World.remove(engine.world, ball);
+
+        ball = newBall(currentX, 50, targetSize);
+        ball.collisionFilter = {
+          group: -1,
+          category: 2,
+          mask: 0,
+        };
+        World.add(engine.world, ball);
+
+        console.log(`[Test] ${targetSize}레벨 과일 스폰!`);
+      }
+    }
+  });
+  // ===========================================================================
 })();

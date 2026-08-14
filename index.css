@@ -65,7 +65,7 @@ button * {
   border-radius: 25px 25px 0 0;
 }
 
-/* ===== 갈색 영역 내부 양끝 정렬 ===== */
+/* ===== 갈색 바닥 패널 ===== */
 #floor {
   width: 480px;
   background: #b37b50;
@@ -86,24 +86,23 @@ button * {
   font-weight: 500;
 }
 
+/* ===== Top 3 버튼 ===== */
 #rankToggleBtn {
-  background: #39af3d; /* 쨍한 형광초록 배경 */
-  color: #ffffff;      /* 또렷한 흰색 텍스트 */
+  background: #39af3d;
+  color: #ffffff;
   border: none;
-  border-radius: 0;   /* 직각 네모 프레임 */
+  border-radius: 0;
   
-  /* 텍스트 크기에 딱 맞춘 타이트한 여백 및 사이즈 */
   padding: 4px 8px;
   font-size: 12px;
   font-weight: bold;
   
-  width: auto;         /* 컨테이너 버튼 스타일 무시하고 내용에 맞춤 */
+  width: auto;
   height: auto;
   
   cursor: pointer;
   line-height: normal;
   
-  /* 클릭감(입체감)을 주는 가벼운 그림자 효과 */
   box-shadow: 0 2px 0 #287d2b;
   transition: all 0.1s ease;
 }
@@ -113,7 +112,7 @@ button * {
   box-shadow: 0 1px 0 #287d2b;
 }
 
-/* ===== Top 3 팝업 모달 스타일 ===== */
+/* ===== 팝업 모달 공통 스타일 ===== */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -177,6 +176,54 @@ button * {
 
 #rankList li {
   margin-bottom: 6px;
+}
+
+/* ===== 닉네임 입력 모달 스타일 ===== */
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+#finalScoreText {
+  margin: 0;
+  font-size: 16px;
+  color: #ddd;
+}
+
+#nicknameInput {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #555;
+  background: #333;
+  color: #fff;
+  font-size: 14px;
+  box-sizing: border-box;
+  outline: none;
+  text-align: center;
+}
+
+#nicknameInput:focus {
+  border-color: #39af3d;
+}
+
+#submitScoreBtn {
+  width: 100%;
+  padding: 10px;
+  background: #39af3d;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#submitScoreBtn:hover {
+  background: #2e8f32;
 }
 
 #overlay {
