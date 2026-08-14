@@ -229,7 +229,7 @@
             newBall(
               (bodies[0].position.x + bodies[1].position.x) / 2,
               (bodies[0].position.y + bodies[1].position.y) / 2,
-              bodies[0].size === 15 ? 15 : bodies[0].size + 1
+              bodies[0].size === 14 ? 14 : bodies[0].size + 1
             )
           );
 
