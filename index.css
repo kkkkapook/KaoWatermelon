@@ -59,6 +59,30 @@ button * {
 
 #game {
   line-height: 0px;
+  position: relative;
+}
+
+/* ===== [테스트용] 우측 상단 강제 종료 버튼 ===== */
+#testGameOverBtn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 99;
+  background: #ff4757;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  width: auto;
+  height: auto;
+}
+
+#testGameOverBtn:active {
+  transform: scale(0.95);
 }
 
 #canvas {
@@ -86,7 +110,7 @@ button * {
   font-weight: 500;
 }
 
-/* ===== Top 3 버튼 ===== */
+/* ===== Top 10 버튼 ===== */
 #rankToggleBtn {
   background: #39af3d;
   color: #ffffff;
@@ -132,18 +156,21 @@ button * {
   border: 1px solid #444;
   border-radius: 16px;
   width: 280px;
+  max-height: 80vh;
   padding: 20px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
   color: #fff;
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
   border-bottom: 1px solid #333;
-  padding-bottom: 10px;
+  padding-bottom: 8px;
 }
 
 .modal-header h3 {
@@ -170,12 +197,14 @@ button * {
 #rankList {
   margin: 0;
   padding-left: 20px;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.8;
+  overflow-y: auto;
+  max-height: 280px;
 }
 
 #rankList li {
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 /* ===== 닉네임 입력 모달 스타일 ===== */
@@ -211,6 +240,7 @@ button * {
 
 #submitScoreBtn {
   width: 100%;
+  height: auto;
   padding: 10px;
   background: #39af3d;
   color: white;

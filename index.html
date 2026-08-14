@@ -38,6 +38,9 @@
       <div class="item"></div>
 
       <div class="item" id="game">
+        <!-- [테스트용] 우측 상단 강제 종료 버튼 -->
+        <button id="testGameOverBtn">💥 강제종료</button>
+
         <div id="overlay">
           <button id="playAgainButton" onclick="location.reload()">
             Play Again
@@ -46,19 +49,22 @@
 
         <canvas id="canvas"></canvas>
 
-        <!-- 갈색 영역: 좌측 텍스트 / 우측 랭킹 버튼 -->
         <div id="floor">
           <p>Made by ❤️ yangchi</p>
-          <button id="rankToggleBtn">🏆 Top 3</button>
+          <button id="rankToggleBtn">🏆 Top 10</button>
         </div>
       </div>
+
+      <div class="item"></div>
+      <div class="item"></div>
+      <div class="item"></div>
     </div>
 
-    <!-- Top 3 랭킹 팝업 모달 -->
+    <!-- Top 10 랭킹 팝업 모달 -->
     <div id="leaderboardModal" class="modal-overlay" style="display: none;">
       <div class="modal-content">
         <div class="modal-header">
-          <h3>🏆 Top 3 랭킹</h3>
+          <h3>🏆 Top 10 랭킹</h3>
           <button id="closeModalBtn">&times;</button>
         </div>
         <ol id="rankList">
@@ -71,7 +77,7 @@
     <div id="nicknameModal" class="modal-overlay" style="display: none;">
       <div class="modal-content">
         <div class="modal-header">
-          <h3>🎉 Game Over!</h3>
+          <h3>🎉 Top 10 진입 성공!</h3>
         </div>
         <div class="modal-body">
           <p id="finalScoreText">최종 점수: 0점</p>

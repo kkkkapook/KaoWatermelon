@@ -2,7 +2,7 @@
 document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
 
 (() => {
-  // ================= [Firebase 초기화 & 랭킹/점수 등록 제어] =================
+  // ================= [Firebase 초기화 & Top 10 제어] =================
   const firebaseConfig = {
     apiKey: "AIzaSyACFXrDzGWmGCi84MIdoo_S4aLMWQX_brs",
     authDomain: "watermelon-game-3109f.firebaseapp.com",
@@ -12,10 +12,10 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
     appId: "1:633308554874:web:893dccbb17199bf6a17dc3"
   };
 
-  if (!firebase.apps.length) {
+  if (typeof firebase !== "undefined" && !firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
   }
-  const db = firebase.firestore();
+  const db = (typeof firebase !== "undefined") ? firebase.firestore() : null;
 
   const rankModal = document.getElementById("leaderboardModal");
   const rankBtn = document.getElementById("rankToggleBtn");
@@ -26,28 +26,33 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
   const submitScoreBtn = document.getElementById("submitScoreBtn");
   const finalScoreText = document.getElementById("finalScoreText");
 
-  // Top 3 불러오기 함수
-  function loadTopScores() {
+  const testGameOverBtn = document.getElementById("testGameOverBtn");
+
+  // Top 10 불러오기 함수
+  function loadTopScores(callback) {
+    if (!db) return;
     db.collection("scores")
       .orderBy("score", "desc")
-      .limit(3)
+      .limit(10)
       .get()
       .then((snapshot) => {
         const rankListEl = document.getElementById("rankList");
-        if (!rankListEl) return;
-        rankListEl.innerHTML = "";
+        if (rankListEl) {
+          rankListEl.innerHTML = "";
 
-        if (snapshot.empty) {
-          rankListEl.innerHTML = "<li>기록 없음</li>";
-          return;
+          if (snapshot.empty) {
+            rankListEl.innerHTML = "<li>기록 없음</li>";
+          } else {
+            snapshot.forEach((doc) => {
+              const data = doc.data();
+              const li = document.createElement("li");
+              li.textContent = `${data.name || "익명"}: ${data.score}점`;
+              rankListEl.appendChild(li);
+            });
+          }
         }
 
-        snapshot.forEach((doc) => {
-          const data = doc.data();
-          const li = document.createElement("li");
-          li.textContent = `${data.name || "익명"}: ${data.score}점`;
-          rankListEl.appendChild(li);
-        });
+        if (callback) callback(snapshot);
       })
       .catch((err) => {
         console.error("랭킹 불러오기 실패:", err);
@@ -56,6 +61,7 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
 
   // 점수 저장 함수
   function saveScore(nickname, currentScore) {
+    if (!db) return;
     if (!nickname || nickname.trim() === "") {
       nickname = "익명";
     }
@@ -69,7 +75,9 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
       .then(() => {
         alert("점수가 등록되었습니다!");
         if (nicknameModal) nicknameModal.style.display = "none";
-        loadTopScores();
+        loadTopScores(() => {
+          if (rankModal) rankModal.style.display = "flex";
+        });
       })
       .catch((err) => {
         console.error("점수 등록 실패:", err);
@@ -77,7 +85,7 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
       });
   }
 
-  // Top 3 팝업 열기/닫기
+  // Top 10 팝업 버튼 처리
   if (rankBtn && rankModal) {
     rankBtn.addEventListener("click", () => {
       loadTopScores();
@@ -99,7 +107,7 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
     });
   }
 
-  // 닉네임 점수 등록 버튼 클릭
+  // 닉네임 제출 버튼 및 엔터 키 처리
   if (submitScoreBtn) {
     submitScoreBtn.addEventListener("click", () => {
       const val = nicknameInput ? nicknameInput.value : "";
@@ -107,12 +115,18 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
     });
   }
 
-  // 엔터 키로도 점수 제출 가능
   if (nicknameInput) {
     nicknameInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         saveScore(nicknameInput.value, score);
       }
+    });
+  }
+
+  // [테스트용] 우측 상단 강제 종료 버튼 클릭
+  if (testGameOverBtn) {
+    testGameOverBtn.addEventListener("click", () => {
+      gameOver();
     });
   }
   // =====================================================================
@@ -151,6 +165,7 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
   let isClicking = false;
   let isMouseOver = false;
   let newSize = 1;
+  let ball = null;
 
   let isGameOver = false;
   let score = 0;
@@ -292,21 +307,21 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
     isLineEnable = false;
     const bodies = Composite.allBodies(engine.world);
     for (let i = 4; i < bodies.length; i++) {
-      body = bodies[i];
+      let currentBody = bodies[i];
 
-      if (body.position.y < 100) {
+      if (currentBody.position.y < 100) {
         if (
-          body !== ball &&
-          Math.abs(body.velocity.x) < 0.2 &&
-          Math.abs(body.velocity.y) < 0.2
+          currentBody !== ball &&
+          Math.abs(currentBody.velocity.x) < 0.2 &&
+          Math.abs(currentBody.velocity.y) < 0.2
         ) {
           gameOver();
         }
-      } else if (body.position.y < 150) {
+      } else if (currentBody.position.y < 150) {
         if (
-          body !== ball &&
-          Math.abs(body.velocity.x) < 0.5 &&
-          Math.abs(body.velocity.y) < 0.5
+          currentBody !== ball &&
+          Math.abs(currentBody.velocity.x) < 0.5 &&
+          Math.abs(currentBody.velocity.y) < 0.5
         ) {
           isLineEnable = true;
         }
@@ -321,12 +336,12 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
     if (isGameOver) return;
 
     e.pairs.forEach((collision) => {
-      bodies = [collision.bodyA, collision.bodyB];
+      let bodies = [collision.bodyA, collision.bodyB];
 
       if (bodies[0].size === undefined || bodies[1].size === undefined) return;
 
       if (bodies[0].size === bodies[1].size) {
-        allBodies = Composite.allBodies(engine.world);
+        let allBodies = Composite.allBodies(engine.world);
         if (allBodies.includes(bodies[0]) && allBodies.includes(bodies[1])) {
           if (
             (Date.now() - bodies[0].createdAt < 100 ||
@@ -352,7 +367,7 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
           score += bodies[0].size;
 
           var audio = new Audio("assets/pop.wav");
-          audio.play();
+          audio.play().catch(() => {});
         }
       }
     });
@@ -444,7 +459,7 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
     createNewBall(1);
   }
 
-  // ===== 게임 오버 처리 및 인게임 커스텀 팝업 =====
+  // ===== 게임 오버 처리 & Top 10 진입 여부 판별 =====
   function gameOver() {
     if (isGameOver) return;
     
@@ -455,18 +470,30 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
 
     if (ball != null) World.remove(engine.world, ball);
 
-    // 딜레이 후 커스텀 닉네임 입력 모달 띄우기
-    setTimeout(() => {
-      if (finalScoreText) {
-        finalScoreText.textContent = `최종 점수: ${score}점`;
+    // Top 10 데이터 판별 후 결과에 따른 팝업 노출
+    if (!db) return;
+    loadTopScores((snapshot) => {
+      let isTop10 = false;
+
+      if (!snapshot || snapshot.docs.length < 10) {
+        isTop10 = true;
+      } else {
+        const tenthScore = snapshot.docs[snapshot.docs.length - 1].data().score || 0;
+        if (score > tenthScore) {
+          isTop10 = true;
+        }
       }
-      if (nicknameInput) {
-        nicknameInput.value = "";
-      }
-      if (nicknameModal) {
-        nicknameModal.style.display = "flex";
-      }
-    }, 400);
+
+      setTimeout(() => {
+        if (isTop10) {
+          if (finalScoreText) finalScoreText.textContent = `최종 점수: ${score}점`;
+          if (nicknameInput) nicknameInput.value = "";
+          if (nicknameModal) nicknameModal.style.display = "flex";
+        } else {
+          if (rankModal) rankModal.style.display = "flex";
+        }
+      }, 300);
+    });
   }
 
   function createNewBall(size) {
@@ -481,7 +508,7 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
   }
 
   function newBall(x, y, size) {
-    c = Bodies.circle(x, y, size * 10, {
+    let ballBody = Bodies.circle(x, y, size * 10, {
       render: {
         sprite: {
           texture: `assets/img/${size}.png`,
@@ -490,37 +517,11 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
         },
       },
     });
-    c.size = size;
-    c.createdAt = Date.now();
-    c.restitution = 0.3;
-    c.friction = 0.1;
+    ballBody.size = size;
+    ballBody.createdAt = Date.now();
+    ballBody.restitution = 0.3;
+    ballBody.friction = 0.1;
 
-    return c;
+    return ballBody;
   }
-
-  // ================= [테스트용 1~10레벨 과일 스폰 단축키 (1~9, 0)] =================
-  window.addEventListener("keydown", (e) => {
-    if (isGameOver) return;
-
-    if (/^[0-9]$/.test(e.key)) {
-      const keyNum = parseInt(e.key, 10);
-      const targetSize = keyNum === 0 ? 10 : keyNum;
-
-      if (ball != null) {
-        const currentX = ball.position.x;
-        World.remove(engine.world, ball);
-
-        ball = newBall(currentX, 50, targetSize);
-        ball.collisionFilter = {
-          group: -1,
-          category: 2,
-          mask: 0,
-        };
-        World.add(engine.world, ball);
-
-        console.log(`[Test] ${targetSize}레벨 과일 스폰!`);
-      }
-    }
-  });
-  // ===========================================================================
 })();
