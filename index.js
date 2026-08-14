@@ -122,6 +122,16 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
     });
   }
 
+// ===== 여기 아래에 'q' 키 단축키 코드를 추가하세요 =====
+  window.addEventListener("keydown", (e) => {
+    // 닉네임 입력창에 글을 쓸 때는 q를 눌러도 게임이 꺼지지 않도록 예외 처리
+    if (document.activeElement === nicknameInput) return;
+
+    if (e.key === "q" || e.key === "Q") {
+      gameOver();
+    }
+  });
+
   // =====================================================================
 
   const Engine = Matter.Engine,
