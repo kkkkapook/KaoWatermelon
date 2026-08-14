@@ -522,16 +522,4 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
     return ballBody;
   }
 
-// "Made by 양치" 텍스트 요소나 특정 하단 제작자 영역만 터치/클릭했을 때 게임 강제 종료
-  const makerText = document.querySelector("#floor span") || document.querySelector("#floor"); 
-  if (makerText) {
-    makerText.addEventListener("click", (e) => {
-      // 랭킹 버튼이나 다른 요소를 누른 게 아닐 때만 작동하도록 방어 코드 추가
-      e.stopPropagation(); 
-      if (confirm("게임을 강제로 종료하시겠습니까?")) {
-        gameOver();
-      }
-    });
-  }
-
 })();
