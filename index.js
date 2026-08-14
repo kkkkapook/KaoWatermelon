@@ -115,7 +115,24 @@
   Engine.run(engine);
   Render.run(render);
 
-  resize();
+  function resize() {
+    canvas.height = 720;
+    canvas.width = 480;
+
+    const scaleX = window.innerWidth / 480;
+    const scaleY = (window.innerHeight - 40) / 720; // 하단 바닥(40px) 고려하여 비율 스케일링
+
+    currentScale = Math.min(scaleX, scaleY);
+
+    parent.style.zoom = "";
+    parent.style.transform = `scale(${currentScale})`;
+    parent.style.transformOrigin = "top center";
+
+    // 갈색 바닥 높이 고정 (랭킹과 문구가 들어갈 높이)
+    floor.style.height = "40px";
+
+    Render.setPixelRatio(render, Math.min(window.devicePixelRatio, 2));
+  }
 
   refreshLoop();
 
