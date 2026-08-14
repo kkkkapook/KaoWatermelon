@@ -41,11 +41,13 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
           if (snapshot.empty) {
             rankListEl.innerHTML = "<li>기록 없음</li>";
           } else {
+            let rank = 1;
             snapshot.forEach((doc) => {
               const data = doc.data();
               const li = document.createElement("li");
-              li.textContent = `${data.name || "익명"}: ${data.score}점`;
+              li.textContent = `${rank}. ${data.name || "익명"} - ${data.score}점`;
               rankListEl.appendChild(li);
+              rank++;
             });
           }
         }
