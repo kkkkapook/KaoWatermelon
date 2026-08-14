@@ -33,7 +33,6 @@
     <link rel="icon shortcut" href="assets/img/7.png" type="image/x-icon" />
 
     <style>
-      /* 게임 외부 여백을 검은색(#000)으로 처리 */
       html, body {
         width: 100%;
         height: 100%;
@@ -41,29 +40,23 @@
         padding: 0;
         overflow: hidden;
         touch-action: none;
-        background-color: #000000; /* 게임 밖 배경 검은색 */
-      }
-
-      .container {
-        width: 100vw;
-        height: 100vh;
+        background-color: #000000; /* PC 바깥 배경은 검은색 */
         display: flex;
         justify-content: center;
         align-items: center;
-        overflow: hidden;
-        background-color: #000000;
       }
 
+      /* PC / 모바일 공통 중앙 컨테이너 */
       #game {
         position: relative;
         width: 480px;
-        height: 750px;
         display: flex;
         flex-direction: column;
         align-items: center;
+        transform-origin: center center;
       }
 
-      /* TOP 3 랭킹 - Canvas 오른쪽 상단에 고정 */
+      /* TOP 3 랭킹 */
       #leaderboard {
         position: absolute;
         top: 15px;
@@ -93,13 +86,22 @@
         white-space: nowrap;
       }
 
+      /* 갈색 바닥 레이어 (기존 원본 비율 복원) */
+      #floor {
+        width: 100%;
+        background-color: #b37346;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
       /* 게임 오버 레이어 및 모달 */
       #overlay {
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
-        height: 100%;
+        height: 720px;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -143,10 +145,6 @@
         border-radius: 8px;
         cursor: pointer;
         width: 100%;
-        transition: background 0.2s;
-      }
-      #submitScoreBtn:hover {
-        background: #2e8c31;
       }
 
       #playAgainButton {
@@ -159,51 +157,50 @@
         border: none;
         border-radius: 8px;
         cursor: pointer;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
       }
 
       .credit-text {
-        margin-top: 6px;
+        margin: 10px 0;
         font-size: 13px;
         font-family: "Pretendard", sans-serif;
-        color: #aaa;
+        color: #fff;
         font-weight: bold;
       }
     </style>
   </head>
 
   <body>
-    <div class="container">
-      <div id="game">
-        <!-- TOP 3 랭킹 -->
-        <div id="leaderboard">
-          <h3>🏆 TOP 3</h3>
-          <ol id="rankList">
-            <li>불러오는 중...</li>
-          </ol>
+    <div id="game">
+      <!-- TOP 3 랭킹 -->
+      <div id="leaderboard">
+        <h3>🏆 TOP 3</h3>
+        <ol id="rankList">
+          <li>불러오는 중...</li>
+        </ol>
+      </div>
+
+      <!-- 게임 오버 및 랭킹 입력 모달 -->
+      <div id="overlay">
+        <div id="scoreInputModal">
+          <p style="margin: 0; color: #ffd700; font-weight: bold; font-size: 18px;">
+            🎉 TOP 3 달성!
+          </p>
+          <input
+            type="text"
+            id="nicknameInput"
+            maxlength="6"
+            placeholder="닉네임 (최대 6자)"
+          />
+          <button id="submitScoreBtn">기록 남기기</button>
         </div>
 
-        <!-- 오버레이 및 모달 -->
-        <div id="overlay">
-          <div id="scoreInputModal">
-            <p style="margin: 0; color: #ffd700; font-weight: bold; font-size: 18px;">
-              🎉 TOP 3 달성!
-            </p>
-            <input
-              type="text"
-              id="nicknameInput"
-              maxlength="6"
-              placeholder="닉네임 (최대 6자)"
-            />
-            <button id="submitScoreBtn">기록 남기기</button>
-          </div>
+        <button id="playAgainButton" onclick="location.reload()">
+          Play Again
+        </button>
+      </div>
 
-          <button id="playAgainButton" onclick="location.reload()">
-            Play Again
-          </button>
-        </div>
-
-        <canvas id="canvas"></canvas>
+      <canvas id="canvas"></canvas>
+      <div id="floor">
         <p class="credit-text">Made by ❤️ yangchi</p>
       </div>
     </div>

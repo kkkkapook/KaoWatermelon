@@ -55,7 +55,8 @@
 
   const parent = document.getElementById("game");
   const canvas = document.getElementById("canvas");
-  const gameOverlayer = document.getElementById("overlay");
+  var gameOverlayer = document.getElementById("overlay");
+  const floor = document.getElementById("floor");
 
   const ctx = canvas.getContext("2d");
   const engine = Engine.create();
@@ -67,7 +68,6 @@
       width: 480,
       height: 720,
       wireframes: false,
-      background: "#fce885", // 캔버스 기본 배경색 지정
     },
   });
 
@@ -86,37 +86,48 @@
   let isLineEnable = false;
   let currentScale = 1;
 
-  // 갈색 물리 바닥 (화면 맨 아래 40px 영역)
-  const ground = Bodies.rectangle(240, 700, 480, 40, {
+  const background = Bodies.rectangle(240, 360, 480, 720, {
     isStatic: true,
-    render: { fillStyle: "#b37346" },
+    render: { fillStyle: "#fe9" },
   });
+  background.collisionFilter = { group: 0, category: 1, mask: -2 };
 
-  const wallLeft = Bodies.rectangle(-25, 360, 50, 720, {
+  const ground = Bodies.rectangle(400, 1220, 810, 1000, {
     isStatic: true,
     render: { fillStyle: "transparent" },
   });
-  const wallRight = Bodies.rectangle(505, 360, 50, 720, {
+  const wallLeft = Bodies.rectangle(-50, 500, 100, 1000, {
+    isStatic: true,
+    render: { fillStyle: "transparent" },
+  });
+  const wallRight = Bodies.rectangle(530, 500, 100, 1000, {
     isStatic: true,
     render: { fillStyle: "transparent" },
   });
 
-  World.add(engine.world, [wallLeft, wallRight, ground]);
+  World.add(engine.world, [wallLeft, wallRight, ground, background]);
 
   Engine.run(engine);
   Render.run(render);
 
+  // PC/모바일 대응 스케일 계산
   function resize() {
     canvas.height = 720;
     canvas.width = 480;
 
-    const scaleX = window.innerWidth / 480;
-    const scaleY = window.innerHeight / 760;
+    const targetWidth = 480;
+    const targetHeight = 820; // 캔버스(720) + 하단 바닥 레이어 높이 고려
 
-    currentScale = Math.min(scaleX, scaleY);
+    const scaleX = window.innerWidth / targetWidth;
+    const scaleY = window.innerHeight / targetHeight;
+
+    // 모바일 등 작을 때만 줄여주고, PC에서는 최대 1배율로 중앙 고정
+    currentScale = Math.min(scaleX, scaleY, 1);
 
     parent.style.transform = `scale(${currentScale})`;
-    parent.style.transformOrigin = "center center";
+    
+    // 갈색 바닥 고정 높이
+    if (floor) floor.style.height = "100px";
 
     Render.setPixelRatio(render, Math.min(window.devicePixelRatio, 2));
   }
@@ -208,7 +219,7 @@
 
     isLineEnable = false;
     const bodies = Composite.allBodies(engine.world);
-    for (let i = 3; i < bodies.length; i++) {
+    for (let i = 4; i < bodies.length; i++) {
       let body = bodies[i];
 
       if (body.position.y < 100) {
@@ -332,7 +343,7 @@
     const modal = document.getElementById("scoreInputModal");
     if (modal) modal.style.display = "none";
 
-    while (engine.world.bodies.length > 3) {
+    while (engine.world.bodies.length > 4) {
       engine.world.bodies.pop();
     }
 
