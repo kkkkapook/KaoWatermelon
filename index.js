@@ -200,24 +200,23 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
 
   addEventListener("mousedown", () => {
     if (isGameOver) return;
-
     isClicking = isMouseOver;
   });
+
   addEventListener("touchstart", (e) => {
     if (isGameOver) return;
-
     isClicking = true;
-    mousePos = e.touches[0].clientX / parent.style.zoom;
-  });
+    const rect = canvas.getBoundingClientRect();
+    mousePos = (e.touches[0].clientX - rect.left) / parent.style.zoom;
+  }, { passive: true });
 
   addEventListener("mouseup", () => {
     if (isGameOver) return;
-
     isClicking = false;
   });
+
   addEventListener("touchend", () => {
     if (isGameOver) return;
-
     isClicking = false;
 
     if (ball != null) {
@@ -238,16 +237,15 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
 
   addEventListener("mousemove", (e) => {
     if (isGameOver) return;
-
     const rect = canvas.getBoundingClientRect();
-    mousePos = e.clientX / parent.style.zoom - rect.left;
+    mousePos = (e.clientX - rect.left) / parent.style.zoom;
   });
+
   addEventListener("touchmove", (e) => {
     if (isGameOver) return;
-
     const rect = canvas.getBoundingClientRect();
-    mousePos = e.touches[0].clientX / parent.style.zoom - rect.left;
-  });
+    mousePos = (e.touches[0].clientX - rect.left) / parent.style.zoom;
+  }, { passive: true });
 
   addEventListener("click", () => {
     if (isGameOver || !isMouseOver) return;
@@ -347,12 +345,15 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
           World.remove(engine.world, bodies[0]);
           World.remove(engine.world, bodies[1]);
 
+          // 맥스레벨 14 유지 처리
+          const nextSize = bodies[0].size >= 14 ? 14 : bodies[0].size + 1;
+
           World.add(
             engine.world,
             newBall(
               (bodies[0].position.x + bodies[1].position.x) / 2,
               (bodies[0].position.y + bodies[1].position.y) / 2,
-              bodies[0].size === 13 ? 13 : bodies[0].size + 1
+              nextSize
             )
           );
 
@@ -368,8 +369,7 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
   Events.on(render, "afterRender", () => {
     if (isGameOver) {
       ctx.fillStyle = "#ffffff55";
-      ctx.rect(0, 0, 480, 720);
-      ctx.fill();
+      ctx.fillRect(0, 0, 480, 720);
 
       writeText("Game Over", "center", 240, 280, 50);
       writeText("Score: " + score, "center", 240, 320, 30);
@@ -402,22 +402,18 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
     canvas.height = 720;
     canvas.width = 480;
 
-    if (isMobile()) {
-      parent.style.zoom = window.innerWidth / 480;
-      parent.style.top = "0px";
+    // 화면 비율에 맞춘 깔끔한 줌 스케일링 계산 (상단 짤림 방지)
+    const availableHeight = window.innerHeight - 60; // 바닥 패널 여유 공간 확보
+    const scaleX = window.innerWidth / 480;
+    const scaleY = availableHeight / 720;
+    
+    let zoom = Math.min(scaleX, scaleY);
+    if (zoom > 1.2) zoom = 1.2; // 너무 커지는 것 방지용 제한
 
-      floor.style.height = `${
-        (window.innerHeight - canvas.height * parent.style.zoom) /
-        parent.style.zoom
-      }px`;
-    } else {
-      parent.style.zoom = window.innerHeight / 720 / 1.3;
-      parent.style.top = `${(canvas.height * parent.style.zoom) / 15}px`;
+    parent.style.zoom = zoom;
+    parent.style.top = "0px";
 
-      floor.style.height = "50px";
-    }
-
-    Render.setPixelRatio(render, parent.style.zoom * 2);
+    Render.setPixelRatio(render, zoom * 2);
   }
 
   function refreshLoop() {
@@ -430,10 +426,6 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
       fps = times.length;
       refreshLoop();
     });
-  }
-
-  function isMobile() {
-    return window.innerHeight / window.innerWidth >= 1.49;
   }
 
   function init() {
@@ -458,11 +450,10 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
     isGameOver = true;
     engine.timing.timeScale = 0;
 
-    gameOverlayer.style.display = "";
+    gameOverlayer.style.display = "flex";
 
     if (ball != null) World.remove(engine.world, ball);
 
-    // Top 10 데이터 판별 후 결과에 따른 팝업 노출
     if (!db) return;
     loadTopScores((snapshot) => {
       let isTop10 = false;
