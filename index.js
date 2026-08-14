@@ -45,9 +45,8 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
             snapshot.forEach((doc) => {
               const data = doc.data();
               const li = document.createElement("li");
-              li.textContent = `${rank}. ${data.name || "익명"} - ${data.score}점`;
+              li.textContent = `${data.name || "익명"} - ${data.score}점`;
               rankListEl.appendChild(li);
-              rank++;
             });
           }
         }
