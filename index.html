@@ -33,7 +33,7 @@
     <link rel="icon shortcut" href="assets/img/7.png" type="image/x-icon" />
 
     <style>
-      /* 화면 스크롤 완전히 방지 */
+      /* 화면 전체 스크롤 및 터치 바운스 완벽 금지 */
       html, body {
         width: 100%;
         height: 100%;
@@ -55,29 +55,30 @@
 
       #game {
         position: relative;
+        width: 480px;
+        height: 750px;
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: flex-start;
       }
 
-      /* TOP 3 랭킹 - 상단 우측에 슬림하게 고정 */
+      /* TOP 3 랭킹 - Canvas 오른쪽 상단에 고정 */
       #leaderboard {
         position: absolute;
-        top: 10px;
-        right: 10px;
+        top: 15px;
+        right: 15px;
         background: rgba(0, 0, 0, 0.75);
         color: #fff;
-        padding: 6px 12px;
+        padding: 8px 12px;
         border-radius: 10px;
         font-family: "Pretendard", sans-serif;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         z-index: 100;
-        pointer-events: none; /* 클릭 방해 금지 */
+        pointer-events: none;
       }
       #leaderboard h3 {
         margin: 0 0 4px 0;
-        font-size: 11px;
+        font-size: 12px;
         color: #ffd700;
         text-align: center;
       }
@@ -91,17 +92,21 @@
         white-space: nowrap;
       }
 
-      /* 오버레이 레이아웃 */
+      /* 게임 오버 레이어 및 모달 */
       #overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         gap: 20px;
-        padding-top: 100px;
+        z-index: 150;
       }
 
-      /* 닉네임 입력 팝업 스타일 */
       #scoreInputModal {
         display: none;
         flex-direction: column;
@@ -145,15 +150,31 @@
 
       #playAgainButton {
         margin-top: 10px;
-        z-index: 150;
+        padding: 12px 24px;
+        font-size: 16px;
+        font-weight: bold;
+        background: #ff5252;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      }
+
+      .credit-text {
+        margin-top: 6px;
+        font-size: 13px;
+        font-family: "Pretendard", sans-serif;
+        color: #555;
+        font-weight: bold;
       }
     </style>
   </head>
 
   <body>
     <div class="container">
-      <div class="item" id="game">
-        <!-- Top 3 전광판 (게임 영역 안 상단 오른쪽) -->
+      <div id="game">
+        <!-- TOP 3 랭킹 -->
         <div id="leaderboard">
           <h3>🏆 TOP 3</h3>
           <ol id="rankList">
@@ -161,8 +182,8 @@
           </ol>
         </div>
 
+        <!-- 오버레이 및 모달 -->
         <div id="overlay">
-          <!-- 닉네임 입력 폼 -->
           <div id="scoreInputModal">
             <p style="margin: 0; color: #ffd700; font-weight: bold; font-size: 18px;">
               🎉 TOP 3 달성!
@@ -176,15 +197,13 @@
             <button id="submitScoreBtn">기록 남기기</button>
           </div>
 
-          <!-- Play Again 버튼 -->
           <button id="playAgainButton" onclick="location.reload()">
             Play Again
           </button>
         </div>
 
         <canvas id="canvas"></canvas>
-        <div id="floor"></div>
-        <p style="margin: 5px 0 0 0; font-size: 12px; color: #333;">Made by ❤️ yangchi</p>
+        <p class="credit-text">Made by ❤️ yangchi</p>
       </div>
     </div>
 

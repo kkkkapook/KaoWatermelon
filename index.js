@@ -13,7 +13,6 @@
   const db = firebase.firestore();
   let top3Scores = [];
 
-  // Top 3 불러오기 함수
   function loadTopScores() {
     db.collection("scores")
       .orderBy("score", "desc")
@@ -43,7 +42,6 @@
       });
   }
 
-  // 게임 시작 시 Top 3 불러오기
   loadTopScores();
   // =====================================================
 
@@ -57,11 +55,9 @@
 
   const parent = document.getElementById("game");
   const canvas = document.getElementById("canvas");
-  var gameOverlayer = document.getElementById("overlay");
-  const floor = document.getElementById("floor");
+  const gameOverlayer = document.getElementById("overlay");
 
   const ctx = canvas.getContext("2d");
-
   const engine = Engine.create();
 
   const render = Render.create({
@@ -87,50 +83,47 @@
   let ball = null;
 
   let isLineEnable = false;
-
-  // 터치/마우스 좌표 수정을 위한 스케일 변수
   let currentScale = 1;
 
+  // 노란 배경
   const background = Bodies.rectangle(240, 360, 480, 720, {
     isStatic: true,
     render: { fillStyle: "#fe9" },
   });
-  background.collisionFilter = {
-    group: 0,
-    category: 1,
-    mask: -2,
-  };
-  const ground = Bodies.rectangle(400, 1220, 810, 1000, {
+  background.collisionFilter = { group: 0, category: 1, mask: -2 };
+
+  // 갈색 물리 바닥 (화면에 일치하도록 720px 지점에 정확하게 배치)
+  const ground = Bodies.rectangle(240, 700, 480, 40, {
+    isStatic: true,
+    render: { fillStyle: "#b37346" },
+  });
+
+  const wallLeft = Bodies.rectangle(-25, 360, 50, 720, {
     isStatic: true,
     render: { fillStyle: "transparent" },
   });
-  const wallLeft = Bodies.rectangle(-50, 500, 100, 1000, {
+  const wallRight = Bodies.rectangle(505, 360, 50, 720, {
     isStatic: true,
     render: { fillStyle: "transparent" },
   });
-  const wallRight = Bodies.rectangle(530, 500, 100, 1000, {
-    isStatic: true,
-    render: { fillStyle: "transparent" },
-  });
+
   World.add(engine.world, [wallLeft, wallRight, ground, background]);
 
   Engine.run(engine);
   Render.run(render);
 
+  // 화면 스케일링 함수
   function resize() {
     canvas.height = 720;
     canvas.width = 480;
 
     const scaleX = window.innerWidth / 480;
-    const scaleY = window.innerHeight / 780; // 모바일 전체 높이 맞춤 비율
+    const scaleY = window.innerHeight / 760;
 
     currentScale = Math.min(scaleX, scaleY);
 
-    parent.style.zoom = "";
     parent.style.transform = `scale(${currentScale})`;
-    parent.style.transformOrigin = "top center";
-
-    if (floor) floor.style.height = "0px";
+    parent.style.transformOrigin = "center center";
 
     Render.setPixelRatio(render, Math.min(window.devicePixelRatio, 2));
   }
@@ -145,7 +138,6 @@
     isClicking = isMouseOver;
   });
 
-  // 아이폰/모바일 좌표 계산 보정
   addEventListener("touchstart", (e) => {
     if (isGameOver) return;
     isClicking = true;
@@ -199,47 +191,8 @@
     }
   });
 
-  // 키보드 숫자키 입력 테스트 지원
-  addEventListener("keydown", (e) => {
-    if (isGameOver) return;
-
-    const keyMap = {
-      "1": 6, "2": 7, "3": 8, "4": 9, "5": 10,
-      "6": 11, "7": 12, "8": 13, "9": 14,
-    };
-
-    const targetSize = keyMap[e.key];
-
-    if (targetSize) {
-      if (ball != null) World.remove(engine.world, ball);
-
-      let spawnX = 240;
-      if (mousePos !== undefined && mousePos > 25 && mousePos < 455) {
-        spawnX = mousePos;
-      }
-
-      const dropBall = newBall(spawnX, 50, targetSize);
-      dropBall.createdAt = 0;
-      dropBall.collisionFilter = { group: 0, category: 1, mask: -1 };
-
-      World.add(engine.world, dropBall);
-      Body.setVelocity(dropBall, { x: 0, y: (100 / fps) * 5.5 });
-
-      ball = null;
-      newSize = Math.ceil(Math.random() * 3);
-      setTimeout(() => {
-        if (ball == null) createNewBall(newSize);
-      }, 500);
-    }
-  });
-
-  canvas.addEventListener("mouseover", () => {
-    isMouseOver = true;
-  });
-
-  canvas.addEventListener("mouseout", () => {
-    isMouseOver = false;
-  });
+  canvas.addEventListener("mouseover", () => { isMouseOver = true; });
+  canvas.addEventListener("mouseout", () => { isMouseOver = false; });
 
   Events.on(engine, "beforeUpdate", () => {
     if (isGameOver) return;
@@ -253,7 +206,6 @@
 
       if (isClicking && mousePos !== undefined) {
         ball.position.x = mousePos;
-
         if (mousePos > 455) ball.position.x = 455;
         else if (mousePos < 25) ball.position.x = 25;
       }
@@ -403,7 +355,6 @@
 
     if (ball != null) World.remove(engine.world, ball);
 
-    // Top 3 랭킹 판정
     const isTop3 =
       top3Scores.length < 3 || score > top3Scores[top3Scores.length - 1].score;
 
